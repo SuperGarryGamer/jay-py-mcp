@@ -87,13 +87,13 @@ class MCP2515:
     def flush_tx_queue(self):
         """Requests transmission of all queued frames"""
         flags = self.get_status()
-        if not self.tx_queue.empty() and (flags & 0b01000000 != 0):
+        if not self.tx_queue.empty() and (flags & 0b01000000 == 0):
             self.set_registers(0x31, self.tx_queue.get().serialize())
             self.spi.xfer([0x81])
-        if not self.tx_queue.empty() and (flags & 0b00010000 != 0):
+        if not self.tx_queue.empty() and (flags & 0b00010000 == 0):
             self.set_registers(0x41, self.tx_queue.get().serialize())
             self.spi.xfer([0x82])
-        if not self.tx_queue.empty() and (flags & 0b00000100 != 0):
+        if not self.tx_queue.empty() and (flags & 0b00000100 == 0):
             self.set_registers(0x51, self.tx_queue.get().serialize())
             self.spi.xfer([0x84])
         # This only directly starts the transmission of up to the first 3 frames, but the rest
