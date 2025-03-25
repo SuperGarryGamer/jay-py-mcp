@@ -79,7 +79,7 @@ class MCP2515:
         while not self.rx_queue.empty():
             frames.append(self.rx_queue.get())
         return frames
-        
+
     def queue_frame(self, frame):
         """Add frame to transmission queue. Transmits after next flush."""
         self.tx_queue.put(frame)
@@ -94,6 +94,10 @@ class MCP2515:
         """Queues a single frame for transmission and flushes it"""
         self.queue_frame(frame)
         self.flush_tx_queue()
+
+    def close(self):
+        self.reset()
+        self.spi.close()
     
     def _on_interrupt(self, flush=False):
         """Interrupt handler, do not call"""
