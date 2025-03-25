@@ -129,6 +129,7 @@ class MCP2515:
             elif flags & 0b10000000 != 0: # TXB2 Clear
                 self.set_registers(0x51, self.tx_queue.get().serialize())
                 self.spi.xfer([0x84])
+        self.spi.xfer([0x05, 0x2c, 0b10101000, 0x00]) # Bit modify the CANINTF register to clear TXnIF flags
 
         
 class CAN_Frame:  
