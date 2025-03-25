@@ -136,20 +136,24 @@ class CAN_Frame:
         self.id = id
         self.data = data
 
-    def __init__(self, raw_data: list[int]):
+    @classmethod
+    def from_raw(cls, raw_data: list[int]):
         """Initialize frame from raw data from RXB0~1 registers"""
+        extended = False
+        remote = False
         if raw_data[1] & 0b00001000 != 0:
-            self.extended = True
+            extended = True
         if raw_data[4] & 0b01000000 != 0:
-            self.remote = True
+            remote = True
 
-        self.id = raw_data[0] << 3 + (raw_data[1] >> 5)
-        if self.extended:
-            self.id = (self.id << 18) + (raw_data[1] << 21) + (raw_data[2] << 8) + raw_data[3]
+        id = raw_data[0] << 3 + (raw_data[1] >> 5)
+        if extended:
+            id = (id << 18) + (raw_data[1] << 21) + (raw_data[2] << 8) + raw_data[3]
         
-        self.data = []
+        data = []
         for i in range(raw_data[4] & 0b00001111):
-            self.data.append(raw_data[5 + i])
+            data.append(raw_data[5 + i])
+        return cls(extended, remote, id, data)
 
     def serialize(self):
         """Returns sequence of bytes representing the frame that can be written directly to TXB0~2 registers"""
