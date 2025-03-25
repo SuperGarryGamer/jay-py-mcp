@@ -65,17 +65,47 @@ class MCP2515:
     def get_status(self):
         """Returns MCP2515 Interrupt status flags"""
         return self.spi.xfer([0xa0, 0x00])[1]
+
+    def get_frame(self):
+        """Returns first frame in the RX Queue, or None if queue is empty"""
+        try:
+            return self.rx_queue.get_nowait()
+        except:
+            return None
+
+    def get_all_frames(self):
+        """Returns a list of all frames in RX Queue"""
+        frames = []
+        while not self.rx_queue.empty():
+            frames.append(self.rx_queue.get())
+        return frames
+        
+    def queue_frame(self, frame):
+        """Add frame to transmission queue. Transmits after next flush."""
+        self.tx_queue.put(frame)
+
+    def flush_tx_queue(self):
+        """Requests transmission of all queued frames"""
+        self._on_interrupt(True)
+        # This only directly starts the transmission of up to the first 3 frames, but the rest
+        # should transmit due to cascading TX Buffer clear interrupts
+
+    def transmit_frame(self, frame):
+        """Queues a single frame for transmission and flushes it"""
+        self.queue_frame(frame)
+        self.flush_tx_queue()
     
-    def _on_interrupt(self):
+    def _on_interrupt(self, flush=False):
         """Interrupt handler, do not call"""
         flags = self.get_status()
-
-        if flags & 0b00000001 != 0: # RXB0 Full
-            raw_data = self.spi.xfer([0x90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])[1:]
-            self.rx_queue.put(CAN_Frame(raw_data))
-        if flags & 0b00000010 != 0: # RXB1 Full
-            raw_data = self.spi.xfer([0x94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])[1:]
-            self.rx_queue.put(CAN_Frame(raw_data))
+        
+        if not flush:
+            if flags & 0b00000001 != 0: # RXB0 Full
+                raw_data = self.spi.xfer([0x90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])[1:]
+                self.rx_queue.put(CAN_Frame(raw_data))
+            if flags & 0b00000010 != 0: # RXB1 Full
+                raw_data = self.spi.xfer([0x94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])[1:]
+                self.rx_queue.put(CAN_Frame(raw_data))
         if not self.tx_queue.empty():
             if   flags & 0b00001000 != 0: # TXB0 Clear
                 self.set_registers(0x31, self.tx_queue.get().serialize())
