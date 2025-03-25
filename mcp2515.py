@@ -86,7 +86,16 @@ class MCP2515:
 
     def flush_tx_queue(self):
         """Requests transmission of all queued frames"""
-        self._on_interrupt(True)
+        flags = self.get_status()
+        if not self.tx_queue.empty() and (flags & 0b01000000 != 0):
+            self.set_registers(0x31, self.tx_queue.get().serialize())
+            self.spi.xfer([0x81])
+        if not self.tx_queue.empty() and (flags & 0b00010000 != 0):
+            self.set_registers(0x41, self.tx_queue.get().serialize())
+            self.spi.xfer([0x82])
+        if not self.tx_queue.empty() and (flags & 0b00000100 != 0):
+            self.set_registers(0x51, self.tx_queue.get().serialize())
+            self.spi.xfer([0x84])
         # This only directly starts the transmission of up to the first 3 frames, but the rest
         # should transmit due to cascading TX Buffer clear interrupts
 
@@ -99,17 +108,17 @@ class MCP2515:
         self.reset()
         self.spi.close()
     
-    def _on_interrupt(self, flush=False):
+    def _on_interrupt(self):
         """Interrupt handler, do not call"""
         flags = self.get_status()
         
-        if not flush:
-            if flags & 0b00000001 != 0: # RXB0 Full
-                raw_data = self.spi.xfer([0x90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])[1:]
-                self.rx_queue.put(CAN_Frame(raw_data))
-            if flags & 0b00000010 != 0: # RXB1 Full
-                raw_data = self.spi.xfer([0x94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])[1:]
-                self.rx_queue.put(CAN_Frame(raw_data))
+       
+        if flags & 0b00000001 != 0: # RXB0 Full
+            raw_data = self.spi.xfer([0x90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])[1:]
+            self.rx_queue.put(CAN_Frame(raw_data))
+        if flags & 0b00000010 != 0: # RXB1 Full
+            raw_data = self.spi.xfer([0x94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])[1:]
+            self.rx_queue.put(CAN_Frame(raw_data))
         if not self.tx_queue.empty():
             if   flags & 0b00001000 != 0: # TXB0 Clear
                 self.set_registers(0x31, self.tx_queue.get().serialize())
