@@ -3,12 +3,12 @@ import random
 import time
 
 def random_frame(extended: bool = False, remote: bool = False):
-    id = random.random() * 0x1fffffff
+    id = int(random.random() * 0x1fffffff)
     if not extended:
         id = id & 0x7fff
     data = []
-    for i in range(random.random() * 8):
-        data.append(random.random() * 255)
+    for i in range(int(random.random() * 8)):
+        data.append(int(random.random() * 255))
 
     return can.CAN_Frame(extended, remote, id, data)
 
