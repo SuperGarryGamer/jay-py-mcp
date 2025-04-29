@@ -36,10 +36,10 @@ class MCP2515:
         if mode < 0 or mode > 4:
             raise ValueError
         
-        canctrl = self.get_register(0xf0)
+        canctrl = self.get_register(0x0f)
         canctrl = canctrl & 0b00011111 # Clear top 3 bits
         canctrl += (mode << 5) # Put mode in top 3 bits
-        self.set_register(0xf0, canctrl)
+        self.set_register(0x0f, canctrl)
 
     def set_register(self, address: int, value: int):
         """Sets register at address to value. Takes 8-bit ints for both."""
