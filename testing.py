@@ -13,7 +13,7 @@ def random_frame(extended: bool = False, remote: bool = False):
     return can.CAN_Frame(extended, remote, id, data)
 
 def prettyprint_frame(frame):
-    print(f"{"Extended " if frame.extended else ""}{"Remote " if frame.remote else ""}CAN Frame {hex(frame.id)}: {frame.data}")
+    print(f"{'Extended ' if frame.extended else ''}{'Remote ' if frame.remote else ''}CAN Frame {hex(frame.id)}: {frame.data}")
 
 def speedtest_tx(can_controller, num_frames):
     for i in range(num_frames):
