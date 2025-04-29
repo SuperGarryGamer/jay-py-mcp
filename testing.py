@@ -5,7 +5,7 @@ import time
 def random_frame(extended: bool = False, remote: bool = False):
     id = int(random.random() * 0x1fffffff)
     if not extended:
-        id = id & 0x7fff
+        id = id & 0x7ff
     data = []
     for i in range(int(random.random() * 8)):
         data.append(int(random.random() * 255))
