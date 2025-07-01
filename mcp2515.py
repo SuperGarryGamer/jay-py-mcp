@@ -109,7 +109,7 @@ class MCP2515:
         self.spi.close()
         GPIO.cleanup()
     
-    def _on_interrupt(self):
+    def _on_interrupt(self, pin):
         """Interrupt handler, do not call"""
         flags = self.get_status()
         
