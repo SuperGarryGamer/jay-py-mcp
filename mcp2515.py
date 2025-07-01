@@ -121,16 +121,16 @@ class MCP2515:
         if flags & 0b00000010 != 0: # RXB1 Full
             raw_data = self.spi.xfer([0x94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])[1:]
             self.rx_queue.put(CAN_Frame.from_raw(raw_data))
-        if not self.tx_queue.empty():
-            if   flags & 0b00001000 != 0: # TXB0 Clear
-                self.set_registers(0x31, self.tx_queue.get().serialize())
-                self.spi.xfer([0x81])
-            elif flags & 0b00100000 != 0: # TXB1 Clear
-                self.set_registers(0x41, self.tx_queue.get().serialize())
-                self.spi.xfer([0x82])
-            elif flags & 0b10000000 != 0: # TXB2 Clear
-                self.set_registers(0x51, self.tx_queue.get().serialize())
-                self.spi.xfer([0x84])
+
+        if   flags & 0b00001000 != 0 and not self.tx_queue.empty(): # TXB0 Clear
+            self.set_registers(0x31, self.tx_queue.get().serialize())
+            self.spi.xfer([0x81])
+        elif flags & 0b00100000 != 0 and not self.tx_queue.empty(): # TXB1 Clear
+            self.set_registers(0x41, self.tx_queue.get().serialize())
+            self.spi.xfer([0x82])
+        elif flags & 0b10000000 != 0 and not self.tx_queue.empty(): # TXB2 Clear
+            self.set_registers(0x51, self.tx_queue.get().serialize())
+            self.spi.xfer([0x84])
         self.spi.xfer([0x05, 0x2c, 0b10101000, 0x00]) # Bit modify the CANINTF register to clear TXnIF flags
 
         
@@ -170,14 +170,14 @@ class CAN_Frame:
     def serialize(self):
         """Returns sequence of bytes representing the frame that can be written directly to TXB0~2 registers"""
         serialized = [0, 0, 0, 0, 0]
+        serialized[0] = self.id >> 21
+        serialized[1] = ((self.id >> 18) & 0b111) << 5 + 8 + ((self.id >> 16) & 0b11) # + 8 sets the EXIDE bit
         if self.extended:
-            serialized[0] = self.id >> 21
-            serialized[1] = ((self.id >> 18) & 0b111) << 5 + 8 + ((self.id >> 16) & 0b11) # + 8 sets the EXIDE bit
             serialized[2] = (self.id >> 8) & 0xFF
             serialized[3] = self.id & 0xFF
-            serialized[4] = len(self.data)
-            if self.remote:
-                serialized[4] += 64 # Set the RTR bit
+        serialized[4] = len(self.data)
+        if self.remote:
+            serialized[4] += 64 # Set the RTR bit
 
         serialized += self.data
         return serialized
