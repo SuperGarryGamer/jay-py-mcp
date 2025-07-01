@@ -170,12 +170,17 @@ class CAN_Frame:
     def serialize(self):
         """Returns sequence of bytes representing the frame that can be written directly to TXB0~2 registers"""
         serialized = [0, 0, 0, 0, 0]
-        serialized[0] = self.id >> 21
-        serialized[1] = ((self.id >> 18) & 0b111) << 5 + 8 + ((self.id >> 16) & 0b11) # + 8 sets the EXIDE bit
         if self.extended:
+            serialized[0] = self.id >> 21
+            serialized[1] = ((self.id >> 18) & 0b111) << 5 + 8 + ((self.id >> 16) & 0b11) # + 8 sets the EXIDE bit
             serialized[2] = (self.id >> 8) & 0xFF
             serialized[3] = self.id & 0xFF
+        else:
+            serialized[0] = self.id >> 3
+            serialized[1] = (self.id & 0b111) << 5
+
         serialized[4] = len(self.data)
+        
         if self.remote:
             serialized[4] += 64 # Set the RTR bit
 
