@@ -16,12 +16,13 @@ class MCP2515:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(interrupt_pin, GPIO.IN)
         GPIO.add_event_detect(interrupt_pin, GPIO.FALLING, callback=self._on_interrupt, bouncetime=50)
-        self.set_register(0x2b, 0x1f)
 
 
-    def reset(self):
+    def reset(self, keep_interrupts=True):
         """Resets internal registers to default, enters configuration mode"""
         self.spi.xfer([0xc0])
+        if keep_interrupts:
+            self.set_register(0x2b, 0x1f)
 
     def set_mode(self, mode: int):
         """Sets MCP2515 operation mode. 
