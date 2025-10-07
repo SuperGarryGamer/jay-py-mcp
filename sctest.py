@@ -61,7 +61,7 @@ def test_receive():
         print("Listening...")
         bus.recv()
         bus.send(can.Message(is_extended_id=False, arbitration_id=0x123, data=[80, 111, 110, 103]))
-        
+        print("Received ping, listening for transmission...")
         # Bulk receive
         done = False
         while not done:
@@ -78,6 +78,6 @@ def test_receive():
         print(f"MD5 Checksum: {checksum.hex()}")
         
         # Send checksum
-        bus.send(can.message(arbitration_id=0x01, data=checksum[:8]))
+        bus.send(can.Message(arbitration_id=0x01, data=checksum[:8]))
         time.sleep(0.1)
-        bus.send(can.message(arbitration_id=0x02, data=checksum[8:]))
+        bus.send(can.Message(arbitration_id=0x02, data=checksum[8:]))
