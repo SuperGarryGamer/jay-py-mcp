@@ -15,7 +15,7 @@ def test_send(frame_count, send_delay):
     for i in range(frame_count-1):
         arb_id = int(random.random() * 0x7FF)
         frame_data = [int(random.random() * 0xFF) for i in range(8)]
-        frames.append(can.Message(is_extended_id=False, arbitration_id=arb_id data=frame_data))
+        frames.append(can.Message(is_extended_id=False, arbitration_id=arb_id, data=frame_data))
         checksum_raw += frame_data
     
     # Distinct end frame (random.random() < 1 -> int(r.r() * 0xFF) != 0xFF)
