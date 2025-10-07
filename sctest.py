@@ -21,7 +21,7 @@ def test_send(frame_count, send_delay):
     # Distinct end frame (random.random() < 1 -> int(r.r() * 0xFF) != 0xFF)
     frames.append(can.Message(is_extended_id=False, arbitration_id=0x7FF, data=[0xFF for i in range(8)]))
     checksum_raw += [0xFF for i in range(8)]
-   checksum = hashlib.md5(bytes(checksum_raw)) 
+    checksum = hashlib.md5(bytes(checksum_raw)) 
 
     with can.Bus(CHANNEL, INTERFACE) as bus:
 
