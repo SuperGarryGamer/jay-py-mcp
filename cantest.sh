@@ -18,11 +18,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-delay=0.1
-
-if [ $# -gt 2 ]; then
-    delay=$2
-fi
+delay=${2:-0.1}
 
 for ((i=0;i<$1;i++)); do
     cansend can0 123#DEADBEEF
