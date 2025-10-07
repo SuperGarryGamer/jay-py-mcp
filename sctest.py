@@ -46,7 +46,7 @@ def test_send(frame_count, send_delay):
         rx_checksum      = bytes() + rx_checksum_high.data + rx_checksum_low.data
         print(f"True checksum: {checksum.hexdigest()}")
         print(f"Received checksum: {rx_checksum.hex()}")
-        if checksum.digest().equals(rx_checksum):
+        if checksum.digest() == rx_checksum:
             print("Checksums match, PASS")
             return True
         else:
