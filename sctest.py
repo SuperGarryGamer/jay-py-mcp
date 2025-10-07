@@ -28,7 +28,7 @@ def test_send(frame_count, send_delay):
         # Ping :3
         ping_msg = can.Message(is_extended_id=False, arbitration_id=0x007, data=[80, 105, 110, 103])
         ping_start = time.time()
-        bus.send(msg)
+        bus.send(ping_msg)
         bus.recv()
         ping_end = time.time()
         print(f"Round trip time: {ping_end - ping_start} seconds")
