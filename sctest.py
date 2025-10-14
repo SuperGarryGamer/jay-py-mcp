@@ -23,6 +23,8 @@ def test_send(frame_count, send_delay):
     checksum_raw += [0xFF for i in range(8)]
     checksum = hashlib.md5(bytes(checksum_raw)) 
 
+    time_spent_waiting = 0
+
     with can.Bus(CHANNEL, INTERFACE) as bus:
 
         # Ping :3
@@ -36,11 +38,26 @@ def test_send(frame_count, send_delay):
         print(f"Sending {frame_count} frames")
         start = time.time()
         for frame in frames:
-            bus.send(frame)
+            try:
+                bus.send(frame)
+            except can.exceptions.CanOperationError:
+                wait_start = time.time()
+                sent = False
+                while not sent:
+                    try:
+                        time.sleep(0.0005)
+                        bus.send(frame)
+                        sent = True
+                    except can.exceptions.CanOperationError:
+                        pass # :)
+                wait_stop = time.time()
+                time_spent_waiting += (wait_stop - wait_start)
+                
             time.sleep(send_delay)
         end = time.time()
         print(f"Sent {frame_count} frames in {end - start} seconds")
-        
+        print(f"Spent {time_spent_waiting} seconds waiting for TX buffer to clear (average {time_spent_waiting/frame_count} per frame)")
+
         rx_checksum_high = bus.recv()
         rx_checksum_low  = bus.recv()
         rx_checksum      = bytes() + rx_checksum_high.data + rx_checksum_low.data
