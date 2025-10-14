@@ -57,7 +57,10 @@ def test_send(frame_count, send_delay):
         end = time.time()
         print(f"Sent {frame_count} frames in {end - start} seconds")
         print(f"Spent {time_spent_waiting} seconds waiting for TX buffer to clear (average {time_spent_waiting/frame_count} per frame)")
-
+        
+        print(f"Nominal TX bitrate:   {int((111*frame_count)/(end - start))} bits/second") # 1 full standard-length ID frame is 111 bits
+        print(f"Effective TX bitrate: {int((64*frame_count)/(end - start))} bits/second") # 1 full frame transmits 64 bits of useful
+    
         rx_checksum_high = bus.recv()
         rx_checksum_low  = bus.recv()
         rx_checksum      = bytes() + rx_checksum_high.data + rx_checksum_low.data
