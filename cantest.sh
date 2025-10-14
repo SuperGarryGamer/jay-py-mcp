@@ -6,7 +6,7 @@
 #
 # auto can0
 # iface can0 can static
-#       bitrate [pick a number, 125000 works]
+#       bitrate [pick a number, 125000 works, 878116 maximum]
 #
 # Run the commands to update network configs:
 # sudo ip addr flush can0 && sudo systemctl restart networking
