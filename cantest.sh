@@ -2,7 +2,7 @@
 # Jay M 2025
 #
 # Setup on a fresh RPi:
-# Add the following to /etc/hosts/interfaces:
+# Add the following to /etc/network/interfaces:
 #
 # auto can0
 # iface can0 can static
