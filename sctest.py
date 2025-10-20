@@ -129,9 +129,7 @@ def video_receive():
                     frame_data_index = 0
 
                 case 0x21: # Image data
-                    print("Got data packet!")
                     for byte in command.data:
-                        print(frame_data_index, x, y)
                         frame_data[frame_data_index] = byte
                         frame_data_index += 1
                 
@@ -146,10 +144,10 @@ def video_transmit():
             for f in range(7777):
                 frame_start = time.time()
                 bus.send(can.Message(arbitration_id=0x20))
-                time.sleep(0.005)
+                time.sleep(0.0005)
                 for i in range(48):
                     bus.send(can.Message(arbitration_id=0x21, data=file.read(8)))
-                    time.sleep(1)
+                    time.sleep(0.0005)
                 frame_end = time.time()
-                time.sleep(1/framerate + (frame_end - frame_start))
+                time.sleep(1/framerate - (frame_end - frame_start))
             bus.send(can.Message(arbitration_id=0x7FF))
