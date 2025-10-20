@@ -101,3 +101,51 @@ def test_receive():
         bus.send(can.Message(arbitration_id=0x01, data=checksum[:8]))
         time.sleep(0.1)
         bus.send(can.Message(arbitration_id=0x02, data=checksum[8:]))
+
+def video_receive():
+    done = False
+    width = 8   # Bytes
+    height = 48 # Lines
+    framerate = 30
+    frame_data = [0xFF for i in range(width * height)]
+    frame_data_index = 0
+    with can.Bus(CHANNEL, INTERFACE) as bus:
+        print("Waiting for transmission.....")
+        while not done:
+            command = bus.recv()
+            match command.arbitration_id:
+                case 0x20: # New frame
+                    for y in range(height):
+                        for x in range(width):
+                            for b in range(8):
+                                if frame_data[x + y*width] & (1 << b) == 0:
+                                    print(" ", end="")
+                                else:
+                                    print("#", end="")
+                        print()
+            
+                    frame_data = [0xAA for i in range(width * height)]
+                    frame_data_index = 0
+
+                case 0x21: # Image data
+                    for byte in command.data:
+                        frame_data[frame_data_index] = byte
+                        frame_data_index += 1
+                
+                case 0x7FF: # End
+                    print("Done :3")
+                    done = True
+
+def video_transmit():
+    framerate = 24
+    with can.Bus(CHANNEL, INTERFACE) as bus:
+        for f in range(7777):
+            frame_start = time.time()
+            bus.send(can.Message(arbitration_id=0x20))
+            time.sleep(0.005)
+                for i in range(8*48):
+                    bus.send(can.Message(arbitration_id=0x21, data=f.read(8)))
+                    time.sleep(0.005)
+            frame_end = time.time()
+            time.sleep(1/framerate + (frame_end - frame_start))
+        bus.send(can.Message(arbitration_id=0x7FF))
