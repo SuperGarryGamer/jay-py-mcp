@@ -107,7 +107,7 @@ def video_receive():
     width = 8   # Bytes
     height = 48 # Lines
     framerate = 30
-    frame_data = [0xFF for i in range(width * height)]
+    frame_data = [0xAA for i in range(width * height)]
     frame_data_index = 0
     with can.Bus(CHANNEL, INTERFACE) as bus:
         print("Waiting for transmission.....")
@@ -119,16 +119,19 @@ def video_receive():
                         for x in range(width):
                             for b in range(8):
                                 if frame_data[x + y*width] & (1 << b) == 0:
-                                    print(" ", end="")
+                                    print("  ", end="")
                                 else:
-                                    print("#", end="")
-                        print()
+                                    print("##", end="")
+                        print(f" Line {y}")
+                    print("=" * 64)
             
                     frame_data = [0xAA for i in range(width * height)]
                     frame_data_index = 0
 
                 case 0x21: # Image data
+                    print("Got data packet!")
                     for byte in command.data:
+                        print(frame_data_index, x, y)
                         frame_data[frame_data_index] = byte
                         frame_data_index += 1
                 
