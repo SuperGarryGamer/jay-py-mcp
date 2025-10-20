@@ -139,13 +139,14 @@ def video_receive():
 def video_transmit():
     framerate = 24
     with can.Bus(CHANNEL, INTERFACE) as bus:
-        for f in range(7777):
-            frame_start = time.time()
-            bus.send(can.Message(arbitration_id=0x20))
-            time.sleep(0.005)
-            for i in range(8*48):
-                bus.send(can.Message(arbitration_id=0x21, data=f.read(8)))
+        with open("out.bin", rb) as file:
+            for f in range(7777):
+                frame_start = time.time()
+                bus.send(can.Message(arbitration_id=0x20))
                 time.sleep(0.005)
-            frame_end = time.time()
-            time.sleep(1/framerate + (frame_end - frame_start))
-        bus.send(can.Message(arbitration_id=0x7FF))
+                for i in range(8*48):
+                    bus.send(can.Message(arbitration_id=0x21, data=file.read(8)))
+                    time.sleep(0.005)
+                frame_end = time.time()
+                time.sleep(1/framerate + (frame_end - frame_start))
+            bus.send(can.Message(arbitration_id=0x7FF))
