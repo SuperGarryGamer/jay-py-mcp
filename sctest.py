@@ -118,10 +118,10 @@ def video_receive():
                     for y in range(height):
                         for x in range(width):
                             for b in range(8):
-                                if frame_data[x + y*width] & (1 << b) == 0:
-                                    print("  ", end="")
-                                else:
+                                if frame_data[x + y*width] & (1 << (7 - b)) == 0:
                                     print("##", end="")
+                                else:
+                                    print("  ", end="")
                         print(f" Line {y}")
                     print("=" * 64)
             
@@ -138,7 +138,7 @@ def video_receive():
                     done = True
 
 def video_transmit():
-    framerate = 24
+    framerate = 8
     with can.Bus(CHANNEL, INTERFACE) as bus:
         with open("out.bin", "rb") as file:
             for f in range(7777):
@@ -150,4 +150,5 @@ def video_transmit():
                     time.sleep(0.0005)
                 frame_end = time.time()
                 time.sleep(1/framerate - (frame_end - frame_start))
+                f += 2
             bus.send(can.Message(arbitration_id=0x7FF))
