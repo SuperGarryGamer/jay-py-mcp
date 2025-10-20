@@ -147,9 +147,9 @@ def video_transmit():
                 frame_start = time.time()
                 bus.send(can.Message(arbitration_id=0x20))
                 time.sleep(0.005)
-                for i in range(8*48):
+                for i in range(48):
                     bus.send(can.Message(arbitration_id=0x21, data=file.read(8)))
-                    time.sleep(0.005)
+                    time.sleep(1)
                 frame_end = time.time()
                 time.sleep(1/framerate + (frame_end - frame_start))
             bus.send(can.Message(arbitration_id=0x7FF))
