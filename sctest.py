@@ -1,3 +1,8 @@
+# TODO
+# Error handling (broken connection)
+# Data structures -> frames -> Data structures
+# Assigning IDs to defined data transmissions
+
 import can
 import random
 import time
@@ -138,7 +143,7 @@ def video_receive():
                     done = True
 
 def video_transmit():
-    framerate = 8
+    framerate = 24
     with can.Bus(CHANNEL, INTERFACE) as bus:
         with open("out.bin", "rb") as file:
             for f in range(7777):
