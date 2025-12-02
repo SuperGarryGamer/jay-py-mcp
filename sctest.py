@@ -120,16 +120,17 @@ def video_receive():
             command = bus.recv()
             match command.arbitration_id:
                 case 0x20: # New frame
+                    frame_list = []
                     for y in range(height):
                         for x in range(width):
                             for b in range(8):
                                 if frame_data[x + y*width] & (1 << (7 - b)) == 0:
-                                    print("##", end="")
+                                    frame_list.append("##")
                                 else:
-                                    print("  ", end="")
-                        print(f" Line {y}")
-                    print("=" * 64)
-            
+                                    frame_list.append("  ")
+                        frame_list.append(" Line {y}\n")
+                    frame_list.append("=" * 64 + "\n")
+                    print("".join(frame_list))
                     frame_data = [0xAA for i in range(width * height)]
                     frame_data_index = 0
 
