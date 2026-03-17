@@ -128,7 +128,7 @@ def video_receive():
                                     frame_list.append("##")
                                 else:
                                     frame_list.append("  ")
-                        frame_list.append(" Line {y}\n")
+                        frame_list.append(f" Line {y}\n")
                     frame_list.append("=" * 64 + "\n")
                     print("".join(frame_list))
                     frame_data = [0xAA for i in range(width * height)]
@@ -155,6 +155,6 @@ def video_transmit():
                     bus.send(can.Message(arbitration_id=0x21, data=file.read(8)))
                     time.sleep(0.0005)
                 frame_end = time.time()
-                time.sleep(1/framerate - (frame_end - frame_start))
+                time.sleep(max(0, 1/framerate - (frame_end - frame_start)))
                 f += 2
             bus.send(can.Message(arbitration_id=0x7FF))
